@@ -126,6 +126,8 @@ alt-w = 'workspace W' # WhatsApp, Telegram
 alt-d = 'workspace D' # Discord, Slack
 alt-f = 'workspace F' # Finder
 alt-p = 'workspace P' # Preview
+alt-r = 'workspace R' # Zotero
+alt-s = 'workspace S' # 3D Slicer
 alt-u = 'workspace U' # Utilities (settings panels, menu-bar app windows)
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
@@ -144,6 +146,8 @@ alt-shift-w = 'move-node-to-workspace W'
 alt-shift-d = 'move-node-to-workspace D'
 alt-shift-f = 'move-node-to-workspace F'
 alt-shift-p = 'move-node-to-workspace P'
+alt-shift-r = 'move-node-to-workspace R'
+alt-shift-s = 'move-node-to-workspace S'
 alt-shift-u = 'move-node-to-workspace U'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
@@ -222,6 +226,20 @@ if.app-id = 'com.google.Chrome'
 if.window-title-regex-substring = 'Picture-in-Picture'
 run = 'layout floating'
 
+# Chrome Zoom windows (web client) - float them. Same reasoning as Meet: the
+# meeting/overlay window is fixed-ish size and should never claim a tile, and it
+# stays on whatever workspace you are on rather than being pulled to B.
+#
+# Zoom opens as a Chrome popup, so the window title is the MEETING TOPIC, not
+# the app name - e.g. "Xihan Ma's Personal Meeting Room". There is no reliable
+# "Zoom" substring to match, hence the topic-shaped patterns below. A meeting
+# with a fully custom topic will still tile; float it with alt-ctrl-t and add
+# its title shape here.
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+if.window-title-regex-substring = 'Personal Meeting Room|Zoom Meeting|Zoom Workplace|Launch Meeting|[Mm]eeting Room'
+run = 'layout floating'
+
 # Chrome Meet windows - float them
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
@@ -265,10 +283,31 @@ run = ['layout tiling', 'move-node-to-workspace P']
 if.app-id = 'com.apple.finder'
 run = ['layout tiling', 'move-node-to-workspace F']
 
+[[on-window-detected]]
+if.app-id = 'org.zotero.zotero'
+run = ['layout tiling', 'move-node-to-workspace R']
+
 # Cursor
 [[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
 run = ['layout tiling', 'move-node-to-workspace C']
+
+# Zed
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = ['layout tiling', 'move-node-to-workspace C']
+
+# 3D Slicer - CHD Observation panel floats over the viewer; must come BEFORE
+# the catch-all below: first matching rule wins.
+[[on-window-detected]]
+if.app-id = 'org.slicer.slicer'
+if.window-title-regex-substring = 'CHD Observation'
+run = ['layout floating', 'move-node-to-workspace S']
+
+# 3D Slicer - all other windows tile on S
+[[on-window-detected]]
+if.app-id = 'org.slicer.slicer'
+run = ['layout tiling', 'move-node-to-workspace S']
 
 # Superwhisper real windows (Settings/History/Models/Recordings) -> utilities
 # workspace. Must come BEFORE the catch-all below: first matching rule wins.
@@ -277,12 +316,12 @@ if.app-id = 'com.superduper.superwhisper'
 if.window-title-regex-substring = '[Ss]ettings|[Hh]istory|[Mm]odels|[Rr]ecordings'
 run = ['layout tiling', 'move-node-to-workspace U']
 
-# Superwhisper recorder overlay - untitled, fixed-size, must stay on top wherever
-# you are. Float it so it never claims a tile (this was eating the right half of
-# workspace O).
+# Superwhisper recorder overlay - untitled, fixed-size. Kept floating so it never
+# claims a tile (this was eating the right half of workspace O), and parked on U
+# with the rest of the Superwhisper windows.
 [[on-window-detected]]
 if.app-id = 'com.superduper.superwhisper'
-run = 'layout floating'
+run = ['layout floating', 'move-node-to-workspace U']
 
 # ---- Menu-bar agent apps (LSUIElement=1) ----------------------------------
 # Float only, NO workspace move. Their popovers/palettes have to open on
